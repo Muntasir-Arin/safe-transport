@@ -2,6 +2,7 @@ package com.safetransport.userservice.service;
 
 import com.safetransport.userservice.dto.VerificationRequestDTO;
 import com.safetransport.userservice.dto.VerificationResponseDTO;
+import com.safetransport.userservice.exception.UserNotFoundException;
 import com.safetransport.userservice.model.ReviewStatus;
 import com.safetransport.userservice.model.User;
 import com.safetransport.userservice.model.VerificationRequests;
@@ -48,7 +49,7 @@ public class VerificationRequestsService {
 
     private User getUserById(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
     }
 
     private VerificationRequests getVerificationRequestById(UUID requestId) {
