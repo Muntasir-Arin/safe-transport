@@ -1,0 +1,49 @@
+services:
+  mysql1:
+    image: mysql:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword1
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: keycloakpassword
+    volumes:
+      - mysql1_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  mysql2:
+    image: mysql:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword2
+      MYSQL_DATABASE: userDB
+      MYSQL_USER: userDB
+      MYSQL_PASSWORD: userpassword
+    volumes:
+      - mysql2_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    restart: unless-stopped
+    environment:
+      # Configure Keycloak to use MySQL as the database:
+      KC_DB: mysql
+      KC_DB_URL_HOST: mysql1
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloakpassword
+      # Set up the initial admin credentials:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    depends_on:
+      - mysql1
+    ports:
+      - "8080:8080"
+    command: ["start-dev"]
+
+volumes:
+  mysql1_data:
+  mysql2_data:
