@@ -2,9 +2,15 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:mysql://localhost:3306/muntasir
-    username: muntasir
-    password: muntasir
+    url: jdbc:mysql://localhost:3307/userDB
+    username: userDB
+    password: userpassword
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${keycloak.domain}/realms/${keycloak.realm}
+
 
   jpa:
     hibernate:
@@ -24,6 +30,19 @@ management:
     health:
       show-details: always
       
+keycloak:
+  realm: safe-transport
+  domain: localhost:9081
+#  adminClientId: admin-cli
+#  adminClientSecret: Sr6CXPYmJ9rSdiGAJftPcey2ad85RjI7
+#  client: authenticationClientId
+#  urls:
+#    auth: http://${keycloak.domain}
+
+jwt:
+  auth:
+    converter:
+      resource-id: authClientID
 
 server:
   port: 8090
