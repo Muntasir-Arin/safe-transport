@@ -1,9 +1,8 @@
 package com.safetransport.locationconsumerservice.controller;
 
 import com.safetransport.locationconsumerservice.dto.VehicleLocation;
+import com.safetransport.locationconsumerservice.dto.VehicleLocationWithDistance;
 import com.safetransport.locationconsumerservice.service.VehicleLocationService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,7 +34,7 @@ public class VehicleController {
     }
 
     @GetMapping("/nearby")
-    public List<VehicleLocation> getNearbyVehicles(@RequestParam double lat, @RequestParam double lon, @RequestParam double radius) {
-        return vehicleService.getNearbyVehicles(lat, lon, radius);
+    public List<VehicleLocationWithDistance> getNearbyVehicles(@RequestParam double lat, @RequestParam double lon, @RequestParam double radius) {
+        return vehicleService.getNearbyVehiclesWithDistance(lat, lon, radius);
     }
 }

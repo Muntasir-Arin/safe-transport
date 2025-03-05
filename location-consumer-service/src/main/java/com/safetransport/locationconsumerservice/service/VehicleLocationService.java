@@ -1,6 +1,7 @@
 package com.safetransport.locationconsumerservice.service;
 
 import com.safetransport.locationconsumerservice.dto.VehicleLocation;
+import com.safetransport.locationconsumerservice.dto.VehicleLocationWithDistance;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResults;
@@ -100,4 +101,45 @@ public class VehicleLocationService {
         System.err.println("⚠ Warning: Vehicle " + vehicleId + " has no location data in Redis.");
         return null;
     }
+
+    public List<VehicleLocationWithDistance> getNearbyVehiclesWithDistance(double latitude, double longitude, double radiusInKm) {
+        GeoOperations<String, String> geoOps = redisTemplate.opsForGeo();
+        Point center = new Point(longitude, latitude);
+        Distance radius = new Distance(radiusInKm, RedisGeoCommands.DistanceUnit.KILOMETERS);
+
+        Boolean exists = redisTemplate.hasKey(VEHICLE_GEO_KEY);
+        if (!exists) {
+            System.err.println("⚠ Error: Geo key " + VEHICLE_GEO_KEY + " does not exist in Redis.");
+            return List.of();
+        }
+
+        GeoResults<RedisGeoCommands.GeoLocation<String>> results = geoOps.radius(VEHICLE_GEO_KEY, new Circle(center, radius),
+                RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().includeDistance());
+
+        if (results == null || results.getContent().isEmpty()) {
+            System.err.println("⚠ Warning: No vehicles found within the radius.");
+            return List.of();
+        }
+
+        return results.getContent().stream()
+                .map(result -> {
+                    String vehicleId = result.getContent().getName();
+                    double distance = result.getDistance().getValue(); // Distance in km
+
+                    VehicleLocation vehicleLocation = getVehicleLocation(geoOps, vehicleId);
+                    if (vehicleLocation != null) {
+                        return new VehicleLocationWithDistance(
+                                vehicleLocation.getVehicleId(),
+                                vehicleLocation.getLatitude(),
+                                vehicleLocation.getLongitude(),
+                                distance
+                        );
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+    }
+
 }
